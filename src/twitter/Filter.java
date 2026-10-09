@@ -3,12 +3,17 @@
  */
 package twitter;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * Filter consists of methods that filter a list of tweets for those matching a
  * condition.
- * 
+ *
  * DO NOT change the method signatures and specifications of these methods, but
  * you should implement their method bodies, and you may add new public or
  * private methods or classes if you like.
@@ -17,7 +22,7 @@ public class Filter {
 
     /**
      * Find tweets written by a particular user.
-     * 
+     *
      * @param tweets
      *            a list of tweets with distinct ids, not modified by this method.
      * @param username
@@ -27,12 +32,19 @@ public class Filter {
      *         in the same order as in the input list.
      */
     public static List<Tweet> writtenBy(List<Tweet> tweets, String username) {
-        throw new RuntimeException("not implemented");
+        List<Tweet> result = new ArrayList<>();
+        for (Tweet tweet : tweets) {
+            // usernames are case-insensitive
+            if (tweet.getAuthor().equalsIgnoreCase(username)) {
+                result.add(tweet);
+            }
+        }
+        return result;
     }
 
     /**
      * Find tweets that were sent during a particular timespan.
-     * 
+     *
      * @param tweets
      *            a list of tweets with distinct ids, not modified by this method.
      * @param timespan
@@ -41,26 +53,49 @@ public class Filter {
      *         in the same order as in the input list.
      */
     public static List<Tweet> inTimespan(List<Tweet> tweets, Timespan timespan) {
-        throw new RuntimeException("not implemented");
+        List<Tweet> result = new ArrayList<>();
+        for (Tweet tweet : tweets) {
+            Instant time = tweet.getTimestamp();
+            // a Timespan includes its endpoints
+            if (!time.isBefore(timespan.getStart()) && !time.isAfter(timespan.getEnd())) {
+                result.add(tweet);
+            }
+        }
+        return result;
     }
 
     /**
      * Find tweets that contain certain words.
-     * 
+     *
      * @param tweets
      *            a list of tweets with distinct ids, not modified by this method.
      * @param words
-     *            a list of words to search for in the tweets. 
+     *            a list of words to search for in the tweets.
      *            A word is a nonempty sequence of nonspace characters.
-     * @return all and only the tweets in the list such that the tweet text (when 
-     *         represented as a sequence of nonempty words bounded by space characters 
-     *         and the ends of the string) includes *at least one* of the words 
+     * @return all and only the tweets in the list such that the tweet text (when
+     *         represented as a sequence of nonempty words bounded by space characters
+     *         and the ends of the string) includes *at least one* of the words
      *         found in the words list. Word comparison is not case-sensitive,
      *         so "Obama" is the same as "obama".  The returned tweets are in the
      *         same order as in the input list.
      */
     public static List<Tweet> containing(List<Tweet> tweets, List<String> words) {
-        throw new RuntimeException("not implemented");
+        Set<String> searchWords = new HashSet<>();
+        for (String word : words) {
+            searchWords.add(word.toLowerCase(Locale.ROOT));
+        }
+
+        List<Tweet> result = new ArrayList<>();
+        for (Tweet tweet : tweets) {
+            for (String tweetWord : tweet.getText().split("\\s+")) {
+                // split() gives an empty first token when the text starts with a space
+                if (!tweetWord.isEmpty() && searchWords.contains(tweetWord.toLowerCase(Locale.ROOT))) {
+                    result.add(tweet);
+                    break; // add each tweet at most once
+                }
+            }
+        }
+        return result;
     }
 
 }
