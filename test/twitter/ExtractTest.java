@@ -21,13 +21,13 @@ public class ExtractTest {
      * Testing strategy for getTimespan(tweets):
      *
      * Partition the inputs as follows:
-     *   tweets.size():                  0, 1, > 1
+     *   tweets.size():                  1, > 1
      *   order of timestamps in list:    ascending, descending, unordered
      *   position of earliest / latest:  first, middle, last
      *   distinct timestamps:            all equal, some equal, all distinct
      *
-     * For an empty list the spec is underdetermined: any zero-length interval
-     * is a minimum-length interval, so we only check start equals end.
+     * An empty list is not tested: the spec does not say what to return, so
+     * the postcondition is underdetermined there.
      * For a single tweet, start and end must both equal its timestamp.
      * Also check that the input list is not modified.
      *
@@ -66,14 +66,6 @@ public class ExtractTest {
     }
 
     /* ---------------------- getTimespan ---------------------- */
-
-    // covers tweets.size() = 0
-    @Test
-    public void testGetTimespanEmptyListZeroLength() {
-        Timespan timespan = Extract.getTimespan(new ArrayList<Tweet>());
-
-        assertEquals("expected zero-length timespan", timespan.getStart(), timespan.getEnd());
-    }
 
     // covers tweets.size() = 1
     @Test

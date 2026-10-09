@@ -1,0 +1,9 @@
+# id | author | timestamp (UTC) | text
+1|alyssa|2016-02-17T10:00:00Z|is it reasonable to talk about rivest so much?
+2|bbitdiddle|2016-02-17T10:20:00Z|@Alyssa rivest talk in 30 minutes #hype
+3|alyssa|2016-02-17T10:45:00Z|@BBitDiddle saving you a seat, ask @Rivest too
+4|rivest|2016-02-17T11:05:00Z|thanks @BBitDiddle! see you all at the talk
+5|cy_d_fect|2016-02-17T12:30:00Z|mail me at cy@mit.edu if the slides are missing
+6|evaluator|2016-02-17T13:10:00Z|Talking about specs is more fun than I expected
+7|alyssa|2016-02-17T14:00:00Z|PSET is due tonight, @evaluator any hints?
+8|bbitdiddle|2016-02-18T09:15:00Z|good morning everyone

@@ -4,38 +4,44 @@
 package twitter;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * This is the main program.
- * 
+ *
+ * The MIT sample server is no longer online, so this version reads a small
+ * file of sample tweets (tweets.txt, in the project folder) instead.
+ * Each line has the form: id|author|timestamp|text. Lines starting with # are
+ * comments.
+ *
  * You may change this class if you wish, but you don't have to.
  */
 public class Main {
-    
-    /**
-     * URL of a server that produces a list of tweets sampled from Twitter
-     * within the last hour. This server may take up to a minute to respond, if
-     * it has to refresh its cached sample of tweets.
-     */
-    public static final URL SAMPLE_SERVER = makeURLAssertWellFormatted("http://courses.csail.mit.edu/6.005/ps1_tweets/tweetPoll.py");
-    
-    private static URL makeURLAssertWellFormatted(String urlString) {
-        try {
-            return new URL(urlString);
-        } catch (MalformedURLException murle) {
-            throw new AssertionError(murle);
+
+    private static final String TWEETS_FILE = "tweets.txt";
+
+    private static List<Tweet> readTweets(String fileName) throws IOException {
+        List<Tweet> tweets = new ArrayList<>();
+        for (String line : Files.readAllLines(Paths.get(fileName))) {
+            if (line.trim().isEmpty() || line.startsWith("#")) {
+                continue;
+            }
+            String[] parts = line.split("\\|", 4);
+            tweets.add(new Tweet(Long.parseLong(parts[0]), parts[1], parts[3], Instant.parse(parts[2])));
         }
+        return tweets;
     }
-    
+
     /**
-     * Main method of the program. Fetches a sample of tweets and prints some
-     * facts about it.
-     * 
+     * Main method of the program. Reads the sample tweets and prints some
+     * facts about them.
+     *
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
@@ -43,33 +49,31 @@ public class Main {
             assert false;
             throw new Error("Always run main and tests with assertions enabled");
         } catch (AssertionError ae) { }
-        
+
         final List<Tweet> tweets;
         try {
-            tweets = TweetReader.readTweetsFromWeb(SAMPLE_SERVER);
+            tweets = readTweets(TWEETS_FILE);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
-        
-        // display some characteristics about the tweets
-        System.err.println("fetched " + tweets.size() + " tweets");
-        
+
+        System.out.println("read " + tweets.size() + " tweets from " + TWEETS_FILE);
+
         final Timespan span = Extract.getTimespan(tweets);
-        System.err.println("ranging from " + span.getStart() + " to " + span.getEnd());
-        
+        System.out.println("ranging from " + span.getStart() + " to " + span.getEnd());
+
         final Set<String> mentionedUsers = Extract.getMentionedUsers(tweets);
-        System.err.println("covers " + mentionedUsers.size() + " Twitter users");
-        
-        // infer the follows graph
-        final Map<String, Set<String>> followsGraph = SocialNetwork.guessFollowsGraph(tweets);
-        System.err.println("follows graph has " + followsGraph.size() + " nodes");
-        
-        // print the top-N influencers
-        final int count = 10;
-        final List<String> influencers = SocialNetwork.influencers(followsGraph);
-        for (String username : influencers.subList(0, Math.min(count, influencers.size()))) {
-            System.out.println(username);
+        System.out.println("mentioned users (" + mentionedUsers.size() + "): " + new java.util.TreeSet<>(mentionedUsers));
+
+        System.out.println("tweets written by alyssa:");
+        for (Tweet tweet : Filter.writtenBy(tweets, "alyssa")) {
+            System.out.println("  " + tweet.getId() + ": " + tweet.getText());
+        }
+
+        System.out.println("tweets containing \"rivest\" or \"pset\":");
+        for (Tweet tweet : Filter.containing(tweets, Arrays.asList("rivest", "pset"))) {
+            System.out.println("  " + tweet.getId() + ": " + tweet.getText());
         }
     }
-    
+
 }
