@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -73,6 +74,13 @@ public class Main {
         System.out.println("tweets containing \"rivest\" or \"pset\":");
         for (Tweet tweet : Filter.containing(tweets, Arrays.asList("rivest", "pset"))) {
             System.out.println("  " + tweet.getId() + ": " + tweet.getText());
+        }
+
+        final Map<String, Set<String>> followsGraph = SocialNetwork.guessFollowsGraph(tweets);
+        final List<String> influencers = SocialNetwork.influencers(followsGraph);
+        System.out.println("top 10 influencers:");
+        for (String username : influencers.subList(0, Math.min(10, influencers.size()))) {
+            System.out.println("  " + username);
         }
     }
 
