@@ -3,7 +3,12 @@
  */
 package twitter;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,7 +46,20 @@ public class SocialNetwork {
      *         either authors or @-mentions in the list of tweets.
      */
     public static Map<String, Set<String>> guessFollowsGraph(List<Tweet> tweets) {
-        throw new RuntimeException("not implemented");
+        // usernames are stored in lowercase so each user appears at most once
+        Map<String, Set<String>> followsGraph = new HashMap<>();
+        for (Tweet tweet : tweets) {
+            String author = tweet.getAuthor().toLowerCase(Locale.ROOT);
+            Set<String> mentioned = new HashSet<>();
+            for (String user : Extract.getMentionedUsers(Collections.singletonList(tweet))) {
+                mentioned.add(user.toLowerCase(Locale.ROOT));
+            }
+            mentioned.remove(author); // users can't follow themselves
+            if (!mentioned.isEmpty()) {
+                followsGraph.computeIfAbsent(author, k -> new HashSet<>()).addAll(mentioned);
+            }
+        }
+        return followsGraph;
     }
 
     /**
@@ -54,7 +72,22 @@ public class SocialNetwork {
      *         descending order of follower count.
      */
     public static List<String> influencers(Map<String, Set<String>> followsGraph) {
-        throw new RuntimeException("not implemented");
+        // follower count of every user in lowercase, including users with 0 followers
+        Map<String, Integer> followerCount = new HashMap<>();
+        for (Map.Entry<String, Set<String>> entry : followsGraph.entrySet()) {
+            followerCount.putIfAbsent(entry.getKey().toLowerCase(Locale.ROOT), 0);
+            for (String followed : entry.getValue()) {
+                followerCount.merge(followed.toLowerCase(Locale.ROOT), 1, Integer::sum);
+            }
+        }
+
+        List<String> influencers = new ArrayList<>(followerCount.keySet());
+        // most followers first; ties are broken alphabetically so the result is repeatable
+        influencers.sort((a, b) -> {
+            int byCount = Integer.compare(followerCount.get(b), followerCount.get(a));
+            return byCount != 0 ? byCount : a.compareTo(b);
+        });
+        return influencers;
     }
 
 }
